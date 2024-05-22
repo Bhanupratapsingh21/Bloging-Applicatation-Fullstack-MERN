@@ -30,8 +30,8 @@ const userSchema = new Schema({
         enum: ["USER", "ADMIN"],
         default: "USER",
     },
-}, 
-{ timestamps: true });
+},
+    { timestamps: true });
 
 // Pre-save hook to hash the password
 userSchema.pre("save", function (next) {
@@ -41,7 +41,7 @@ userSchema.pre("save", function (next) {
     if (!user.isModified("password")) return next();
 
     // Generate a salt
-    const generateSalt = randomBytes(16).toString("hex");
+    const generateSalt = randomBytes(16).toString();
 
     // Hash the password using the salt
     const hashedPassword = createHmac("sha256", generateSalt)
@@ -54,6 +54,21 @@ userSchema.pre("save", function (next) {
 
     next();
 });
+userSchema.statics.matchPassword = async function (email, password) {
+    const user = await this.findOne({ email });
+    if (!user) throw new Error("User Not Found");
+
+    const generateSalt = user.salt;
+    const hashedPassword = user.password;
+
+    const userProvidedHash = createHmac("sha256", generateSalt)
+        .update(password) // Use the provided password here
+        .digest("hex");
+
+    if (hashedPassword !== userProvidedHash) throw new Error("Incorrect Password");
+
+    return user;
+};
 
 // Create the User model
 const User = model("User", userSchema);

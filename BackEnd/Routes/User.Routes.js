@@ -2,8 +2,12 @@ import { Router } from "express";
 import User from "../Models/User.models.js"
 const UserRouter = Router();
 
-UserRouter.post("/signin",(req,res)=>{
-    return res.send("signin")
+UserRouter.post("/signin",async(req,res)=>{
+    const { email , password } = req.body;
+    // create a virtual funtion so it is used to create a funtion to 
+    const user = await User.matchPassword(email,password)
+    return res.json(user)
+
 })
 
 
