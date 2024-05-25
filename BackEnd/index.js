@@ -4,16 +4,22 @@ import ConnectDb from "./Utils/Connection.js";
 import { configDotenv } from "dotenv";
 import cookieParser from "cookie-parser";
 import checkforAuthenticationCookie  from "./Middlewares/Authentication.js"
+import BlogRouter from "./Routes/Blogs.Routes.js";
 
 const app = express();
 const PORT = 4000;
 
+configDotenv({
+    path:"./.env"
+})
+
+// middleware's for work releted
 app.use(express.json());
 app.use(cookieParser());
-app.use(check)
-
+app.use(checkforAuthenticationCookie("token"));
 app.get("/", (req, res) => res.send("Hello"))
 
+// Db connections
 
 ConnectDb()
     .then(() => {
@@ -25,7 +31,10 @@ ConnectDb()
 
         // Define routes
         app.use('/user', UserRouter)
+        app.use("/Blogs", BlogRouter)
     })
     .catch(err => {
         console.log("MongoDB connection failed!!", err);
     });
+
+    

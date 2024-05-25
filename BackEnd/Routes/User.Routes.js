@@ -33,5 +33,13 @@ UserRouter.post("/signup", async (req, res) => {
     return res.json({ user })
 })
 
+UserRouter.get("/logout", (req,res)=>{
+    res.clearCookie("token").status(200).json({ "MSG" : "User Logged Out Successfully" })
+})
+
+
+
+
+
 
 export default UserRouter
