@@ -31,7 +31,7 @@ ConnectDb()
 
         // Define routes
         app.use('/user', UserRouter)
-        app.use("/Blogs", BlogRouter)
+        app.use("/blogs", BlogRouter)
     })
     .catch(err => {
         console.log("MongoDB connection failed!!", err);
