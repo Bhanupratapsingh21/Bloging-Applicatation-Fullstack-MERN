@@ -1,19 +1,19 @@
 import { validateToken } from "../Utils/Authentication.js"
 
-function checkforAuthenticationCookie (cookieName){
-    return (req,res,next)=>{
-        
-        const tokenCookieValue = req.cookies[cookieName];
-        
-        if(!tokenCookieValue) return next();
+function checkforAuthenticationCookie(req, res, next) {
 
-        try {
-            const userpayload = validateToken(tokenCookieValue);
-            req.user = userpayload;
-        } catch (error) {
-            console.error("Token validation failed:", error);
-        }
-        return next();
+    const tokenCookieValue = req.cookies["token"];
+
+    if (!tokenCookieValue) return res.status(401).json({ "MSG": "Please Login" });
+
+    try {
+        const userpayload = validateToken(tokenCookieValue);
+        req.user = userpayload;
+        // console.log(userpayload)
+        next();
+    } catch (error) {
+        console.error("Token validation failed:", error);
+        res.status(401).json({"MSG": "Please Login"})
     }
 }
 

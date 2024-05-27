@@ -16,7 +16,7 @@ configDotenv({
 // middleware's for work releted
 app.use(express.json());
 app.use(cookieParser());
-app.use(checkforAuthenticationCookie("token"));
+// app.use(checkforAuthenticationCookie("token"));
 app.get("/", (req, res) => res.send("Hello"))
 
 // Db connections
