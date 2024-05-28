@@ -20,6 +20,9 @@ const blogSchema = new Schema({
         },
         username : {
             type : String
+        },
+        profileimg: {
+            type : String
         }
     },
 }, { timestamps: true }

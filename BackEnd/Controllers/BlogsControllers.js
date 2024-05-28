@@ -1,12 +1,12 @@
 import Blog from "../Models/Blogs.models.js";
 import { uploadOnCloudinary } from "../Utils/Cloudinary.js";
 
-async function handleaddblogs (req, res) {
+async function handleaddblogs(req, res) {
     try {
         // Check if profile image file exists
         const profileImgPath = req.files?.profileimg?.[0]?.path;
         // console.log(req.files)
-        const {title,body} = req.body
+        const { title, body } = req.body
 
         if (!profileImgPath) {
             return res.status(400).json({ "msg": "Profile image is required" });
@@ -20,15 +20,16 @@ async function handleaddblogs (req, res) {
         const blog = await Blog.create({
             title,
             body,
-            coverImageURL : uploadedImage.url,
-            createdBy : {
+            coverImageURL: uploadedImage.url,
+            createdBy: {
                 _id: req.user._id,
-                username : req.user.email
+                username: req.user.email,
+                profileimg: req.user.profileImageURL,
             },
         });
 
-        if(!blog) return res.status(501).json({"MSG":"Something want wrong while posting blogs"})
-        
+        if (!blog) return res.status(501).json({ "MSG": "Something want wrong while posting blogs" })
+
         return res.status(201).json(blog)
 
     } catch (error) {
@@ -37,16 +38,16 @@ async function handleaddblogs (req, res) {
     }
 }
 
-async function getblogsbasic (req,res){
-    const {q , limit } = req.query;
+async function getblogsbasic(req, res) {
+    const { q, limit } = req.query;
     let sortOption = {};
-    if(q=== "newestfirst"){
-        sortOption = { createdAt : -1 };
-    }else if (q === 'oldestfirst') {
+    if (q === "newestfirst") {
+        sortOption = { createdAt: -1 };
+    } else if (q === 'oldestfirst') {
         sortOption = { createdAt: 1 };
     }
 
-    const limitOptions = parseInt(limit) || 10 ; // default will be 10 im case url not will hit 
+    const limitOptions = parseInt(limit) || 10; // default will be 10 im case url not will hit 
 
     try {
         const blogs = await Blog.find().sort(sortOption).limit(limitOptions);
@@ -58,8 +59,51 @@ async function getblogsbasic (req,res){
     }
 }
 
+async function updateeditblogs(req, res) {
+    const _id = req.params.id
+    try {
+        const profileImgPath = req.files?.profileimg?.[0]?.path;
+        // console.log(req.files)
+        const { title, body } = req.body
+        const blogsdata = { 
+            title,
+            body,
+            createdBy: {
+                _id: req.user._id,
+                username: req.user.email,
+                profileimg: req.user.profileImageURL,
+            },
+        };
+        if (profileImgPath) {
+            const uploadedImage = await uploadOnCloudinary(profileImgPath);
+            if (!uploadedImage) {
+                return res.status(500).json({ "msg": "Failed to upload image" });
+            }
+            blogsdata.coverImageURL = uploadedImage.url
+        }
+
+        const updatedblog = await Blog.findByIdAndUpdate(_id,
+            blogsdata,
+            { new: true }
+        );
+
+        if (!updatedblog) return res.json({ "MSG": "BLOG Is Not Found'd" })
+
+        return res.status(200).json({ "MSG": "BLOG Updated", updatedblog });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(501).json({ "MSG": "Internal Server Error" });
+    }
+
+}
+async function deleteblogs (req,res){
+    return res.send("DONE")
+}
+
 export {
     handleaddblogs,
     getblogsbasic,
-
+    updateeditblogs,
+    deleteblogs
 }
