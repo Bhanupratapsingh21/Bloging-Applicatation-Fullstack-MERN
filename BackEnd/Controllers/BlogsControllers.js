@@ -21,8 +21,11 @@ async function handleaddblogs (req, res) {
             title,
             body,
             coverImageURL : uploadedImage.url,
-            createdBy : req.user._id,
-        })
+            createdBy : {
+                _id: req.user._id,
+                username : req.user.email
+            },
+        });
 
         if(!blog) return res.status(501).json({"MSG":"Something want wrong while posting blogs"})
         
@@ -34,7 +37,29 @@ async function handleaddblogs (req, res) {
     }
 }
 
+async function getblogsbasic (req,res){
+    const {q , limit } = req.query;
+    let sortOption = {};
+    if(q=== "newestfirst"){
+        sortOption = { createdAt : -1 };
+    }else if (q === 'oldestfirst') {
+        sortOption = { createdAt: 1 };
+    }
+
+    const limitOptions = parseInt(limit) || 10 ; // default will be 10 im case url not will hit 
+
+    try {
+        const blogs = await Blog.find().sort(sortOption).limit(limitOptions);
+        res.status(200).json(blogs)
+
+    } catch (error) {
+        console.error('Error fetching blogs:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
 export {
     handleaddblogs,
+    getblogsbasic,
 
 }

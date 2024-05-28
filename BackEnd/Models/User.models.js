@@ -7,6 +7,7 @@ import { createTokenForUser } from "../Utils/Authentication.js";
 const userSchema = new Schema({
     fullname: {
         type: String,
+        unique : true,
         required: true,
     },
     email: {

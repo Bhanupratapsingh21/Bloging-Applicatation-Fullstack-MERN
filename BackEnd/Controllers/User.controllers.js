@@ -2,8 +2,12 @@ import User from "../Models/User.models.js";
 
 async function handlesignin(req, res) {
     const { email, password } = req.body;
-    try {
+    
+    if(!email || !password){
+        return res.status(301).json({ "MSG" : "Email & Password Is Required to login"})
+    }
 
+    try {
         // create a virtual function so it is used to create a funtion to 
         const token = await User.matchPasswordandgenratetoken(email, password)
         // console.log("token :", token)
@@ -21,10 +25,24 @@ async function handlesignuplogin (req, res) {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const checkalreadyexist = await User.findOne({email})
-    if(checkalreadyexist){
-        return res.json({"MSG":"Email Already Exist Please Login"})
-    }
+    const checkAlreadyExist = await User.findOne({
+        $or: [
+          { email: email },
+          { fullname: fullname }
+        ]
+      });
+      
+      if (checkAlreadyExist) {
+        if (checkAlreadyExist.email === email && checkAlreadyExist.fullname === fullname) {
+          return res.json({ "MSG": "Email and Fullname already exist. Please login." });
+        } else if (checkAlreadyExist.email === email) {
+          return res.json({ "MSG": "Email already exists. Please login." });
+        } else if (checkAlreadyExist.fullname === fullname) {
+          return res.json({ "MSG": "Fullname already exists. Please use a different fullname." });
+        }
+      }
+
+    
 
     const user = await User.create({
         fullname,
@@ -32,7 +50,11 @@ async function handlesignuplogin (req, res) {
         password
     })
 
-    return res.json({ user })
+    // create a virtual function so it is used to create a funtion to 
+    const token = await User.matchPasswordandgenratetoken(email, password)
+    // console.log("token :", token)
+
+    return res.cookie("token", token).json({ user }).status(201)
 }
 
 function handlelogout(req,res){
