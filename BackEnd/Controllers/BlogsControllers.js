@@ -116,7 +116,7 @@ async function deleteblogs (req,res){
         
         const resdeletefromcloudinary = await deletefromcloudinary(blogsresult?.coverImageURL?.public_id);
 
-        return res.status(200).json({"MSG" : "Blog Deleted SuccessFully",resdeletefromcloudinary})
+        return res.status(200).json({"MSG" : "Blog Deleted SuccessFully"})
     } catch (error) {
         console.log(error)
         return res.status(501).json({"MSG" : "Something Want Wrong"})

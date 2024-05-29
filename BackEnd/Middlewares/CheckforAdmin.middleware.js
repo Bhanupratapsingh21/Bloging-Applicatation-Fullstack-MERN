@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Blog from "../Models/Blogs.models.js";
-
+// check on any edit delete opration that the person who is sending the req is owner admin or not of that post 
 async function verifyadmin(req, res, next) {
     const _id = req.params.id; // Assuming you're capturing the ID from the request params
     const ObjectId = mongoose.Types.ObjectId;
