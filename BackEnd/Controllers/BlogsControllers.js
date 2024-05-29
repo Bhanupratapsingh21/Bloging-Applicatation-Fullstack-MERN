@@ -61,13 +61,13 @@ async function getblogsbasic(req, res) {
         res.status(500).send('Internal Server Error');
     }
 }
-
 async function updateeditblogs(req, res) {
-    const _id = req.params.id
+    const _id = req.params.id;
     try {
         const profileImgPath = req.files?.profileimg?.[0]?.path;
-        // console.log(req.files)
-        const { title, body } = req.body
+        const { title, body } = req.body;
+
+        // Initialize blogsdata with the necessary fields
         const blogsdata = { 
             title,
             body,
@@ -75,31 +75,38 @@ async function updateeditblogs(req, res) {
                 _id: req.user._id,
                 username: req.user.email,
                 profileimg: req.user.profileImageURL,
-            },
+            }
         };
+
         if (profileImgPath) {
             const uploadedImage = await uploadOnCloudinary(profileImgPath);
+            const lastblogimage = await Blog.findById(_id);
+            if (lastblogimage && lastblogimage.coverImageURL && lastblogimage.coverImageURL.public_id) {
+                await deletefromcloudinary(lastblogimage.coverImageURL.public_id);
+            }
+
             if (!uploadedImage) {
                 return res.status(500).json({ "msg": "Failed to upload image" });
             }
-            blogsdata.coverImageURL = uploadedImage.url
+
+            blogsdata.coverImageURL = {
+                url: uploadedImage.url,
+                public_id: uploadedImage.public_id
+            };
         }
 
-        const updatedblog = await Blog.findByIdAndUpdate(_id,
-            blogsdata,
-            { new: true }
-        );
+        const updatedblog = await Blog.findByIdAndUpdate(_id, blogsdata, { new: true });
 
-        if (!updatedblog) return res.json({ "MSG": "BLOG Is Not Found'd" })
+        if (!updatedblog) return res.status(404).json({ "MSG": "BLOG Not Found" });
 
         return res.status(200).json({ "MSG": "BLOG Updated", updatedblog });
 
     } catch (error) {
-        console.log(error)
-        return res.status(501).json({ "MSG": "Internal Server Error" });
+        console.error(error);
+        return res.status(500).json({ "MSG": "Internal Server Error" });
     }
-
 }
+
 
 async function deleteblogs (req,res){
     const _id = req.params.id;
