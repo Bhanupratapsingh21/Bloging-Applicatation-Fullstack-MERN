@@ -1,5 +1,5 @@
 import Blog from "../Models/Blogs.models.js";
-import { uploadOnCloudinary } from "../Utils/Cloudinary.js";
+import { deletefromcloudinary, uploadOnCloudinary } from "../Utils/Cloudinary.js";
 
 async function handleaddblogs(req, res) {
     try {
@@ -20,7 +20,10 @@ async function handleaddblogs(req, res) {
         const blog = await Blog.create({
             title,
             body,
-            coverImageURL: uploadedImage.url,
+            coverImageURL: {
+                url: uploadedImage.url,
+                public_id : uploadedImage.public_id
+            },
             createdBy: {
                 _id: req.user._id,
                 username: req.user.email,
@@ -97,8 +100,20 @@ async function updateeditblogs(req, res) {
     }
 
 }
+
 async function deleteblogs (req,res){
-    return res.send("DONE")
+    const _id = req.params.id;
+    try {
+        const blogsresult = await Blog.findByIdAndDelete(_id)
+        if(!blogsresult) return res.status(300).json({ "MSG" : "Can't Find The Blog By ID"});
+        
+        const resdeletefromcloudinary = await deletefromcloudinary(blogsresult?.coverImageURL?.public_id);
+
+        return res.status(200).json({"MSG" : "Blog Deleted SuccessFully",resdeletefromcloudinary})
+    } catch (error) {
+        console.log(error)
+        return res.status(501).json({"MSG" : "Something Want Wrong"})
+    }
 }
 
 export {
