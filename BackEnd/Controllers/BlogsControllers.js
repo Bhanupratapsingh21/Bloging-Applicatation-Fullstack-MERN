@@ -112,7 +112,7 @@ async function deleteblogs (req,res){
     const _id = req.params.id;
     try {
         const blogsresult = await Blog.findByIdAndDelete(_id)
-        if(!blogsresult) return res.status(300).json({ "MSG" : "Can't Find The Blog By ID"});
+        if(!blogsresult) return res.status(404).json({ "MSG" : "Can't Find The Blog By ID"});
         
         const resdeletefromcloudinary = await deletefromcloudinary(blogsresult?.coverImageURL?.public_id);
 
@@ -123,9 +123,26 @@ async function deleteblogs (req,res){
     }
 }
 
+async function handlegetindividualblog (req,res){
+    const _id = req.params.id;
+    try {
+        
+        const blog = await Blog.findById({_id});
+        
+        if(!blog) return res.stutus(404).json({"MSG":"Yoor Req blog Not Found"});
+
+        return res.status(200).json(blog);
+
+    } catch (error) {
+        console.log(error);
+        return res.status(501).json({"MSG" : "Something Want Wrong"});
+    }
+}
+
 export {
     handleaddblogs,
     getblogsbasic,
     updateeditblogs,
-    deleteblogs
+    deleteblogs,
+    handlegetindividualblog,
 }
