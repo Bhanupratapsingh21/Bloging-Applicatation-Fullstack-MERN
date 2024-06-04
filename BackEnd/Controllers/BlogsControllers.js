@@ -9,12 +9,12 @@ async function handleaddblogs(req, res) {
         const { title, body } = req.body
 
         if (!profileImgPath) {
-            return res.status(400).json({ "msg": "Profile image is required" });
+            return res.status(400).json({ "MSG": "Profile image is required" });
         }
         // Upload image to Cloudinary
         const uploadedImage = await uploadOnCloudinary(profileImgPath);
         if (!uploadedImage) {
-            return res.status(500).json({ "msg": "Failed to upload image" });
+            return res.status(500).json({ "MSG": "Failed to upload image" });
         }
 
         const blog = await Blog.create({
@@ -37,7 +37,7 @@ async function handleaddblogs(req, res) {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ "msg": "Server error", "error": error.message });
+        res.status(500).json({ "MSG": "Server error", "error": error.message });
     }
 }
 
@@ -86,7 +86,7 @@ async function updateeditblogs(req, res) {
             }
 
             if (!uploadedImage) {
-                return res.status(500).json({ "msg": "Failed to upload image" });
+                return res.status(500).json({ "MSG": "Failed to upload image" });
             }
 
             blogsdata.coverImageURL = {
